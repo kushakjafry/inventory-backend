@@ -4,12 +4,13 @@ import {
   ArgumentsHost,
   HttpException,
   HttpStatus,
+  Logger,
 } from '@nestjs/common';
-import { MongoError } from 'mongodb';
 import { Error as MongooseError } from 'mongoose';
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
+  private readonly logger = new Logger(AllExceptionsFilter.name);
   catch(exception: any, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse();
@@ -19,14 +20,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
       message: 'No error provided',
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
     };
-    console.log(exception);
     if (exception instanceof HttpException) {
-      if (typeof exception.getResponse() === 'string') {
-        error.message = exception.getResponse();
-      } else {
-        error = exception;
-      }
-      error.statusCode = exception.getStatus();
+      error = exception.getResponse();
     } else if (exception?.name === 'MongoError') {
       if (exception?.code === 11000) {
         error.message = exception.message;
@@ -37,7 +32,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     } else if (exception instanceof MongooseError) {
       error.message = exception.message;
     }
-
+    this.logger.debug(exception);
     response.status(error.statusCode).json({
       ...error,
       timestamp: new Date().toISOString(),
