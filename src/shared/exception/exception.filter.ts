@@ -19,9 +19,14 @@ export class AllExceptionsFilter implements ExceptionFilter {
       message: 'No error provided',
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
     };
-
+    console.log(exception);
     if (exception instanceof HttpException) {
-      error = exception.getResponse();
+      if (typeof exception.getResponse() === 'string') {
+        error.message = exception.getResponse();
+      } else {
+        error = exception;
+      }
+      error.statusCode = exception.getStatus();
     } else if (exception?.name === 'MongoError') {
       if (exception?.code === 11000) {
         error.message = exception.message;
