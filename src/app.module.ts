@@ -9,6 +9,7 @@ import { ProductModule } from './product/product.module';
 import mongoDbConfig from './config/mongoDb.config';
 import { APP_FILTER } from '@nestjs/core';
 import { AllExceptionsFilter } from './shared/exception/exception.filter';
+import { SellerModule } from './seller/seller.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { AllExceptionsFilter } from './shared/exception/exception.filter';
     AuthModule,
     UserModule,
     ProductModule,
+    SellerModule,
   ],
   controllers: [AppController],
   providers: [

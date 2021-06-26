@@ -4,12 +4,14 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { AuthService } from 'src/auth/services/auth.service';
 import { createUserDto } from '../dto/create-user.dto';
 import { LoginUserDto } from '../dto/login-user.dto';
+import { UpdateUserDto } from '../dto/update-user.dto';
 import { UserI } from '../interfaces/user.interface';
 import { User } from '../models/user.entitiy';
 @Injectable()
@@ -21,7 +23,24 @@ export class UserService {
   private readonly users: UserI[];
 
   async findOne(username: string): Promise<UserI | null> {
-    return await this.UserModel.findOne({ username: username });
+    const user = await this.UserModel.findOne({ username: username });
+    await user.save();
+    return user;
+  }
+
+  async updateUser(
+    username: string,
+    input: UpdateUserDto,
+  ): Promise<any | null> {
+    const user = await this.UserModel.findOneAndUpdate(
+      { username: username },
+      { $set: input },
+      { new: true },
+    );
+    if (!user) {
+      throw new BadRequestException('Username is not available');
+    }
+    return user;
   }
 
   async registerUser(payload: createUserDto): Promise<UserI | null> {

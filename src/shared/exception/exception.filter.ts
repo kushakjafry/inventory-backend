@@ -25,14 +25,15 @@ export class AllExceptionsFilter implements ExceptionFilter {
     } else if (exception?.name === 'MongoError') {
       if (exception?.code === 11000) {
         error.message = exception.message;
-        error.statusCode = exception.statusCode;
+        error.statusCode = HttpStatus.CONFLICT;
       } else {
         error.message = exception.message;
       }
     } else if (exception instanceof MongooseError) {
       error.message = exception.message;
     }
-    this.logger.debug(exception);
+    this.logger.error(exception);
+    console.log(error);
     response.status(error.statusCode).json({
       ...error,
       timestamp: new Date().toISOString(),
